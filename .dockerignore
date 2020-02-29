@@ -1,5 +1,5 @@
-target/
-.idea/
+target/**
+.idea/**
 *.iml
 .mvn/wrapper/maven-wrapper.jar
-src/main/docker/*
+src/main/docker/

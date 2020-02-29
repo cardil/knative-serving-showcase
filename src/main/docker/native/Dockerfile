@@ -10,9 +10,18 @@
 # docker run -i --rm -p 8080:8080 cardil/knative-serving-showcase
 #
 ###
+
+ARG IMAGE_TAG=20.0.0-java11
+FROM docker.io/oracle/graalvm-ce:${IMAGE_TAG} as builder
+RUN gu install native-image
+RUN mkdir -p /work
+WORKDIR /work
+COPY ./ /work
+RUN ./mvnw -Pnative verify
+
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
 WORKDIR /work/
-COPY target/*-runner /work/application
+COPY --from=builder /work/target/*-runner /work/application
 
 # set up permissions for user `1001`
 RUN chmod 775 /work /work/application \

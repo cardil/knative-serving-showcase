@@ -10,9 +10,17 @@
 # docker run -i --rm -p 8080:8080 cardil/knative-serving-showcase:jvm
 #
 ###
+
+ARG IMAGE_TAG=11-jdk
+FROM docker.io/library/openjdk:${IMAGE_TAG} as builder
+RUN mkdir -p /work
+WORKDIR /work
+COPY ./ /work
+RUN ./mvnw verify
+
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
 
-ARG JAVA_PACKAGE=java-1.8.0-openjdk-headless
+ARG JAVA_PACKAGE=java-11-openjdk-headless
 ARG RUN_JAVA_VERSION=1.3.5
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
@@ -34,9 +42,10 @@ RUN microdnf install openssl curl ca-certificates ${JAVA_PACKAGE} \
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 
-COPY target/lib/* /deployments/lib/
-COPY target/*-runner.jar /deployments/app.jar
+COPY --from=builder /work/target/lib/* /deployments/lib/
+COPY --from=builder /work/target/*-runner.jar /deployments/app.jar
 
+WORKDIR /deployments
 EXPOSE 8080
 USER 1001
 
