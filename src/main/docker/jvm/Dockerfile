@@ -11,12 +11,13 @@
 #
 ###
 
-ARG IMAGE_TAG=11-jdk
-FROM docker.io/library/openjdk:${IMAGE_TAG} as builder
-RUN mkdir -p /work
+ARG IMAGE_TAG=20.0.0-java11
+ARG MAVEN_ARGS='-B'
+FROM quay.io/quarkus/ubi-quarkus-native-image:${IMAGE_TAG} as builder
+USER root
 WORKDIR /work
 COPY ./ /work
-RUN ./mvnw -B verify
+RUN ./mvnw ${MAVEN_ARGS} -B verify
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
 
