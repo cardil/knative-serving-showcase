@@ -1,21 +1,31 @@
 package io.github.cardil.knsvng.view;
 
+import io.github.cardil.knsvng.domain.entity.Hello;
 import io.quarkus.test.junit.QuarkusTest;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.Test;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
+import javax.inject.Inject;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @QuarkusTest
-public class HelloResourceTest {
+class HelloResourceTest {
 
-    @Test
-    public void testHelloEndpoint() {
-        given()
-                .when().get("/hello")
-                .then()
-                .statusCode(200)
-                .body(is("hello"));
-    }
+  private final HelloResourceTestClient helloTestClient;
+
+  @Inject
+  HelloResourceTest(@RestClient HelloResourceTestClient helloTestClient) {
+    this.helloTestClient = helloTestClient;
+  }
+
+  @Test
+  void hello() {
+    Hello hello = helloTestClient.hello("Guy");
+
+    assertThat(hello)
+      .extracting(Hello::getGreeting, Hello::getWho)
+      .containsExactly("Hello", "Guy");
+  }
 
 }
