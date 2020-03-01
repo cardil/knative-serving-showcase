@@ -17,7 +17,7 @@ RUN gu install native-image
 RUN mkdir -p /work
 WORKDIR /work
 COPY ./ /work
-RUN ./mvnw -Pnative verify
+RUN ./mvnw -B -Pnative verify
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
 WORKDIR /work/

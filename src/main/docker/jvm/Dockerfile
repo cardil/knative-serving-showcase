@@ -16,7 +16,7 @@ FROM docker.io/library/openjdk:${IMAGE_TAG} as builder
 RUN mkdir -p /work
 WORKDIR /work
 COPY ./ /work
-RUN ./mvnw verify
+RUN ./mvnw -B verify
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
 
