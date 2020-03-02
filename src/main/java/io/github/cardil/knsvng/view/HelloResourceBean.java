@@ -9,7 +9,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 
-
 @ApplicationScoped
 @Path("")
 public class HelloResourceBean implements HelloResource {
