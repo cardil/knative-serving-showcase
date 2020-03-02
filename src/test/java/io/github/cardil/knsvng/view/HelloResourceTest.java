@@ -24,8 +24,8 @@ class HelloResourceTest {
     Hello hello = helloTestClient.hello("Guy");
 
     assertThat(hello)
-      .extracting(Hello::getGreeting, Hello::getWho)
-      .containsExactly("Hello", "Guy");
+      .extracting(Hello::getGreeting, Hello::getWho, Hello::getNumber)
+      .containsExactly("Hello", "Guy", 1);
   }
 
 }

@@ -14,14 +14,22 @@ import java.util.Optional;
 public class HelloResourceBean implements HelloResource {
   private static final Logger LOGGER = LoggerFactory.getLogger(HelloResourceBean.class);
 
+  private int number = 0;
+
   @Override
   public Hello hello(String who) {
-    LOGGER.info("Received hello for: {}", who);
+    int counter = getNumber();
+    LOGGER.info("Received hello({}) for: {}", counter, who);
     String greeting = Optional
       .ofNullable(System.getenv("GREET"))
       .orElse("Hello");
-    Hello hello = new Hello(greeting, who);
+    Hello hello = new Hello(greeting, who, counter);
     LOGGER.debug("Responding with: {}", hello);
     return hello;
+  }
+
+  private synchronized int getNumber() {
+    number++;
+    return number;
   }
 }

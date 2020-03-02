@@ -1,0 +1,17 @@
+---
+kind: Service
+apiVersion: serving.knative.dev/v1alpha1
+metadata:
+  name: serving-showcase
+spec:
+  template:
+    spec:
+      containers:
+        - name: serving-showcase
+          image: quay.io/cardil/knative-serving-showcase
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+          livenessProbe:
+            httpGet:
+              path: /health/live

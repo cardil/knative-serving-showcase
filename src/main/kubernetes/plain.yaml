@@ -1,0 +1,42 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: plain-showcase
+  labels:
+    app: plain-showcase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plain-showcase
+  template:
+    metadata:
+      labels:
+        app: plain-showcase
+    spec:
+      containers:
+        - name: plain-showcase
+          image: quay.io/cardil/knative-serving-showcase
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 21111
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 21111
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: plain-showcase
+spec:
+  selector:
+    app: plain-showcase
+  type: LoadBalancer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 21111

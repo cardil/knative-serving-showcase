@@ -3,6 +3,8 @@ package io.github.cardil.knsvng.view;
 import io.github.cardil.knsvng.domain.entity.Hello;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,5 +20,11 @@ public interface HelloResource {
   )
   @Path("hello")
   @Produces(MediaType.APPLICATION_JSON)
-  Hello hello(@QueryParam("who") @DefaultValue("Person") String who);
+  @Valid
+  Hello hello(
+    @QueryParam("who")
+    @DefaultValue("Person")
+    @Pattern(regexp = "^[A-Z][a-z]+$")
+      String who
+  );
 }

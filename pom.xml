@@ -123,6 +123,10 @@
       <artifactId>stringify-object</artifactId>
       <version>2.0.0</version>
     </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-opentracing</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
