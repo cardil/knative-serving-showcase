@@ -1,12 +1,13 @@
 package io.github.cardil.knsvng.view;
 
+import io.github.cardil.knsvng.domain.contract.HelloService;
 import io.github.cardil.knsvng.domain.entity.Hello;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.Path;
-import java.util.Optional;
 
 
 @ApplicationScoped
@@ -14,39 +15,23 @@ import java.util.Optional;
 public class HelloResourceBean implements HelloResource {
   private static final Logger LOGGER = LoggerFactory.getLogger(HelloResourceBean.class);
 
-  private int number = 0;
+  private final HelloService helloService;
+
+  @Inject
+  HelloResourceBean(HelloService helloService) {
+    this.helloService = helloService;
+  }
 
   @Override
   public Hello hello(String who) {
-    var counter = getNumber();
-    LOGGER.info("Received hello({}) for: {}", counter, who);
-    var greeting = Optional
-      .ofNullable(System.getenv("GREET"))
-      .orElse("Hello");
-    long delay = Optional
-      .ofNullable(System.getenv("DELAY"))
-      .map(Long::parseLong)
-      .orElse(0L);
-    if (delay > 0L) {
-      sleep(delay);
-    }
-    var hello = new Hello(greeting, who, counter);
-    LOGGER.debug("Responding with: {}", hello);
-    return hello;
-  }
-
-  private synchronized int getNumber() {
-    number++;
-    return number;
-  }
-
-  private void sleep(long delay) {
     try {
-      Thread.sleep(delay);
-    } catch (InterruptedException ex) {
-      LOGGER.warn("Interrupted!", ex);
-      // Restore interrupted state...
-      Thread.currentThread().interrupt();
+      var hello = helloService.greet(who);
+      LOGGER.info("Received hello({}) for: {}", hello.getNumber(), who);
+      LOGGER.debug("Responding with: {}", hello);
+      return hello;
+    } catch (RuntimeException ex) {
+      LOGGER.info("Received hello for: {}", who);
+      throw ex;
     }
   }
 }
