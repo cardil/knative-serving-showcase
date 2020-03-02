@@ -1,4 +1,6 @@
 target/**
+!target/*-runner
+!target/*-runner.jar
 .idea/**
 *.iml
 .mvn/wrapper/maven-wrapper.jar

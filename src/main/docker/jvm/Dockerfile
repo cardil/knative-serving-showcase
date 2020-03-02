@@ -11,14 +11,6 @@
 #
 ###
 
-ARG IMAGE_TAG=20.0.0-java11
-ARG MAVEN_ARGS='-B'
-FROM quay.io/quarkus/ubi-quarkus-native-image:${IMAGE_TAG} as builder
-USER root
-WORKDIR /work
-COPY ./ /work
-RUN ./mvnw ${MAVEN_ARGS} -B verify
-
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
 
 ARG JAVA_PACKAGE=java-11-openjdk-headless
@@ -43,8 +35,8 @@ RUN microdnf install openssl curl ca-certificates ${JAVA_PACKAGE} \
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 
-COPY --from=builder /work/target/lib/* /deployments/lib/
-COPY --from=builder /work/target/*-runner.jar /deployments/app.jar
+COPY target/lib/* /deployments/lib/
+COPY target/*-runner.jar /deployments/app.jar
 
 WORKDIR /deployments
 EXPOSE 8080
