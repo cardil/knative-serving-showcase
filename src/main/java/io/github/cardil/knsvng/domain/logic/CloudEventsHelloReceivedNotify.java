@@ -9,6 +9,7 @@ import pl.wavesoftware.eid.utils.EidExecutions;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.Validator;
 import java.net.URI;
 import java.util.UUID;
 
@@ -22,10 +23,12 @@ class CloudEventsHelloReceivedNotify implements HelloReceivedNotify {
   );
 
   private final EventSender eventSender;
+  private final Validator validator;
 
   @Inject
-  CloudEventsHelloReceivedNotify(EventSender eventSender) {
+  CloudEventsHelloReceivedNotify(EventSender eventSender, Validator validator) {
     this.eventSender = eventSender;
+    this.validator = validator;
   }
 
   @Override
@@ -35,6 +38,7 @@ class CloudEventsHelloReceivedNotify implements HelloReceivedNotify {
       .withId(UUID.randomUUID().toString())
       .withSource(SOURCE)
       .withData(hello)
+      .withValidator(validator)
       .build();
     try {
       eventSender.send(event);
