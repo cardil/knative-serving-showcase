@@ -18,12 +18,19 @@ public class HelloResourceBean implements HelloResource {
 
   @Override
   public Hello hello(String who) {
-    int counter = getNumber();
+    var counter = getNumber();
     LOGGER.info("Received hello({}) for: {}", counter, who);
-    String greeting = Optional
+    var greeting = Optional
       .ofNullable(System.getenv("GREET"))
       .orElse("Hello");
-    Hello hello = new Hello(greeting, who, counter);
+    long delay = Optional
+      .ofNullable(System.getenv("DELAY"))
+      .map(Long::parseLong)
+      .orElse(0L);
+    if (delay > 0L) {
+      sleep(delay);
+    }
+    var hello = new Hello(greeting, who, counter);
     LOGGER.debug("Responding with: {}", hello);
     return hello;
   }
@@ -31,5 +38,15 @@ public class HelloResourceBean implements HelloResource {
   private synchronized int getNumber() {
     number++;
     return number;
+  }
+
+  private void sleep(long delay) {
+    try {
+      Thread.sleep(delay);
+    } catch (InterruptedException ex) {
+      LOGGER.warn("Interrupted!", ex);
+      // Restore interrupted state...
+      Thread.currentThread().interrupt();
+    }
   }
 }

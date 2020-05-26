@@ -1,17 +1,22 @@
 ####
 # This Dockerfile is used in order to build a container that runs the Quarkus application in native (no JVM) mode
 #
+# Build the app with:
+#
+# ./mvnw -Pnative package
+#
 # Build the image with:
 #
-# docker build -f src/main/docker/native/Dockerfile -t cardil/knative-serving-showcase .
+# docker build -f src/main/container/native/Dockerfile -t cardil/knative-serving-showcase .
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 cardil/knative-serving-showcase
+# docker run -i --rm -p 21111:21111 cardil/knative-serving-showcase
 #
 ###
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
+ARG UBI_VERSION=8.2
+FROM registry.access.redhat.com/ubi8/ubi-minimal:${UBI_VERSION}
 WORKDIR /work/
 COPY target/*-runner /work/application
 
@@ -21,7 +26,7 @@ RUN chmod 775 /work /work/application \
   && chmod -R "g+rwX" /work \
   && chown -R 1001:root /work
 
-EXPOSE 8080
+EXPOSE 21111
 USER 1001
 
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]

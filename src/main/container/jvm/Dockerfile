@@ -1,20 +1,25 @@
 ####
 # This Dockerfile is used in order to build a container that runs the Quarkus application in JVM mode
 #
+# Build the app with:
+#
+# ./mvnw package
+#
 # Build the image with:
 #
-# docker build -f src/main/docker/jvm/Dockerfile -t cardil/knative-serving-showcase:jvm .
+# docker build -f src/main/container/jvm/Dockerfile -t cardil/knative-serving-showcase:jvm .
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 cardil/knative-serving-showcase:jvm
+# docker run -i --rm -p 21111:21111 cardil/knative-serving-showcase:jvm
 #
 ###
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
+ARG UBI_VERSION=8.2
+FROM registry.access.redhat.com/ubi8/ubi-minimal:${UBI_VERSION}
 
 ARG JAVA_PACKAGE=java-11-openjdk-headless
-ARG RUN_JAVA_VERSION=1.3.5
+ARG RUN_JAVA_VERSION=1.3.8
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
 
@@ -39,7 +44,7 @@ COPY target/lib/* /deployments/lib/
 COPY target/*-runner.jar /deployments/app.jar
 
 WORKDIR /deployments
-EXPOSE 8080
+EXPOSE 21111
 USER 1001
 
 ENTRYPOINT [ "/deployments/run-java.sh" ]

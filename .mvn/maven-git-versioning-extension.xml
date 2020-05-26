@@ -1,0 +1,6 @@
+<gitVersioning>
+  <branch>
+    <pattern><![CDATA[(?<branch>.+)]]></pattern>
+    <versionFormat>${branch}-${commit.short}${dirty}</versionFormat>
+  </branch>
+</gitVersioning>
