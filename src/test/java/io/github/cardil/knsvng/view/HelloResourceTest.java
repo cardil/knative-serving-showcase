@@ -34,7 +34,7 @@ class HelloResourceTest {
   void invalidHello() {
     ThrowingCallable throwingCallable = () -> helloResource.hello("small-caps");
 
-    assertThatThrownBy(throwingCallable).hasMessageContaining("status code 500");
+    assertThatThrownBy(throwingCallable).hasMessageContaining("status code 400");
   }
 
 }

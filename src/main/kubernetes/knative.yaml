@@ -1,14 +1,16 @@
 ---
+apiVersion: serving.knative.dev/v1
 kind: Service
-apiVersion: serving.knative.dev/v1alpha1
 metadata:
   name: serving-showcase
 spec:
   template:
     spec:
       containers:
-        - name: serving-showcase
-          image: quay.io/cardil/knative-serving-showcase
+        - image: quay.io/cardil/knative-serving-showcase
+#          env:
+#            - name: DELAY
+#              value: 1350
           readinessProbe:
             httpGet:
               path: /health/ready
