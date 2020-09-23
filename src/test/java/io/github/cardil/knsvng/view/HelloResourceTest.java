@@ -7,6 +7,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+import java.util.List;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,11 +25,17 @@ class HelloResourceTest {
 
   @Test
   void hello() {
-    var hello = helloResource.hello("Guy");
+    var names = List.of(
+      "Alice", "Bob", "Charlie", "Doug", "Emily", "Fran", "Greg"
+    );
+    var rand = new Random();
+    var idx = rand.nextInt(names.size());
+    var name = names.get(idx);
+    var hello = helloResource.hello(name);
 
     assertThat(hello)
       .extracting(Hello::getGreeting, Hello::getWho, Hello::getNumber)
-      .containsExactly("Hello", "Guy", 1);
+      .containsExactly("Hello", name, 1);
   }
 
   @Test

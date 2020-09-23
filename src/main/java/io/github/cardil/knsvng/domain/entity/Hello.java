@@ -1,9 +1,9 @@
 package io.github.cardil.knsvng.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import pl.wavesoftware.utils.stringify.Stringify;
 
-import javax.json.bind.annotation.JsonbCreator;
-import javax.json.bind.annotation.JsonbProperty;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
@@ -13,11 +13,11 @@ public final class Hello {
   private final String who;
   private final int number;
 
-  @JsonbCreator
+  @JsonCreator
   public Hello(
-    @JsonbProperty("greeting") String greeting,
-    @JsonbProperty("who") String who,
-    @JsonbProperty("number") int number
+    @JsonProperty("greeting") String greeting,
+    @JsonProperty("who") String who,
+    @JsonProperty("number") int number
   ) {
     this.greeting = greeting;
     this.who = who;

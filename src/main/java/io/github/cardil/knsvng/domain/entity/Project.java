@@ -1,25 +1,25 @@
 package io.github.cardil.knsvng.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.arc.config.ConfigProperties;
 import io.quarkus.arc.config.ConfigProperties.NamingStrategy;
 import pl.wavesoftware.utils.stringify.Stringify;
 
-import javax.json.bind.annotation.JsonbProperty;
 import javax.validation.constraints.NotEmpty;
 
 @ConfigProperties(prefix = "project", namingStrategy = NamingStrategy.KEBAB_CASE)
 public class Project {
-  @JsonbProperty("group-id")
+  @JsonProperty("group-id")
   @NotEmpty
   public String groupId;
-  @JsonbProperty("artifact-id")
+  @JsonProperty("artifact-id")
   @NotEmpty
   public String artifactId;
-  @JsonbProperty
+  @JsonProperty
   @NotEmpty
   public String version;
 
-  @JsonbProperty("platform-version")
+  @JsonProperty("platform-version")
   @NotEmpty
   public String platformVersion;
 

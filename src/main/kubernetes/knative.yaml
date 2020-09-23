@@ -7,10 +7,12 @@ spec:
   template:
     spec:
       containers:
-        - image: quay.io/cardil/knative-serving-showcase:1-services
+        - image: quay.io/cardil/knative-serving-showcase:2-send-event
 #          env:
 #            - name: DELAY
 #              value: 1350
+#            - name: K_SINK
+#              value: http://broker-ingress.knative-eventing.svc.cluster.local/demo/default
           readinessProbe:
             httpGet:
               path: /health/ready
