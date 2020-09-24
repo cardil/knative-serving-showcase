@@ -1,7 +1,16 @@
 ---
 name: Container build
 
-on: push
+on:
+  schedule:
+    # everyday at 10am
+    - cron: '0 10 * * *'
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*.*.*'
+  pull_request:
 
 jobs:
   native:
@@ -10,6 +19,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Prepare
+        id: prep
+        run: |
+          DOCKER_IMAGE=quay.io/cardil/knative-serving-showcase
+          VERSION=noop
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            VERSION=nightly
+          elif [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          elif [[ $GITHUB_REF == refs/heads/* ]]; then
+            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+          elif [[ $GITHUB_REF == refs/pull/* ]]; then
+            VERSION=pr-${{ github.event.number }}
+          fi
+          TAGS="${DOCKER_IMAGE}:${VERSION}"
+          if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
+            TAGS="$TAGS,${DOCKER_IMAGE}:latest"
+          fi
+          TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
+
+          echo ::set-output name=version::${VERSION}
+          echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -20,18 +52,23 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
-      - name: Extract branch name
-        id: extract_branch
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./src/main/container/native-standalone/Dockerfile
-          push: true
-          tags: quay.io/cardil/knative-serving-showcase:${{ steps.extract_branch.outputs.branch }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.prep.outputs.tags }}
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.description=${{ github.event.repository.description }}
+            org.opencontainers.image.url=${{ github.event.repository.html_url }}
+            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
@@ -41,6 +78,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Prepare
+        id: prep
+        run: |
+          DOCKER_IMAGE=quay.io/cardil/knative-serving-showcase
+          VERSION=noop
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            VERSION=nightly
+          elif [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          elif [[ $GITHUB_REF == refs/heads/* ]]; then
+            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+          elif [[ $GITHUB_REF == refs/pull/* ]]; then
+            VERSION=pr-${{ github.event.number }}
+          fi
+          TAGS="${DOCKER_IMAGE}:${VERSION}-jvm"
+          if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
+            TAGS="$TAGS,${DOCKER_IMAGE}:latest-jvm"
+          fi
+          TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}-jvm"
+
+          echo ::set-output name=version::${VERSION}
+          echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -51,17 +111,22 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
-      - name: Extract branch name
-        id: extract_branch
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./src/main/container/jvm-standalone/Dockerfile
-          push: true
-          tags: quay.io/cardil/knative-serving-showcase:${{ steps.extract_branch.outputs.branch }}-jvm
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.prep.outputs.tags }}
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.description=${{ github.event.repository.description }}
+            org.opencontainers.image.url=${{ github.event.repository.html_url }}
+            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
