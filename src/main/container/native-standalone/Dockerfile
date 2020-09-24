@@ -20,8 +20,7 @@ USER root
 ADD . /work
 WORKDIR /work
 RUN ./mvnw -B -V verify
-# Xmx 2G limit is set due to Quay.io builder memory limits
-RUN ./mvnw -B -V -Pnative -Dquarkus.native.native-image-xmx=2g verify
+RUN ./mvnw -B -V -Pnative verify
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:${UBI_VERSION}
 WORKDIR /work/
