@@ -13,9 +13,12 @@ import javax.inject.Inject;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
+
+import java.net.URI;
 
 import static pl.wavesoftware.eid.DefaultEid.eid;
 
@@ -34,14 +37,23 @@ class MicroprofileRestClientEventSender implements EventSender {
   @Override
   public void send(CloudEvent ce) {
     var sink = eventsConfiguration.sinkAddress();
-    var target = ClientBuilder.newClient()
+    var target = webTarget(sink);
+    var res = target
+      .request()
+      .buildPost(Entity.entity(ce, CloudEventsProvider.CLOUDEVENT_TYPE))
+      .invoke();
+    handleResponse(ce, sink, res);
+  }
+
+  private WebTarget webTarget(URI sink) {
+    return ClientBuilder.newClient()
       .register(
         new CloudEventsProvider(),
         MessageBodyReader.class, MessageBodyWriter.class, ClientRequestFilter.class
       ).target(sink);
-    var res = target.request()
-      .buildPost(Entity.entity(ce, CloudEventsProvider.CLOUDEVENT_TYPE))
-      .invoke();
+  }
+
+  private void handleResponse(CloudEvent ce, URI sink, Response res) {
     if (isSuccessful(res)) {
       LOGGER.info("Event {} sent to {}", ce.getId(), sink);
     } else {

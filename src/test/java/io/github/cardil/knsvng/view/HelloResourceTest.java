@@ -59,7 +59,7 @@ class HelloResourceTest {
       .containsExactly("Hello", name, 1);
 
     wireMockServer.verify(1,
-      postRequestedFor(UrlPattern.ANY)
+      postRequestedFor(new UrlPattern(equalTo("/"), false))
         .withHeader("Ce-Specversion", equalTo("1.0"))
         .withHeader("Ce-Source", equalTo("//events/serving-showcase"))
         .withHeader("Ce-Type", equalTo(Hello.class.getName()))
