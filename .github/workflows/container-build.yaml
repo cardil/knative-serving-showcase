@@ -34,10 +34,6 @@ jobs:
             VERSION=pr-${{ github.event.number }}
           fi
           TAGS="${DOCKER_IMAGE}:${VERSION}"
-          if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-            TAGS="$TAGS,${DOCKER_IMAGE}:latest"
-          fi
-          TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
 
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
@@ -93,10 +89,6 @@ jobs:
             VERSION=pr-${{ github.event.number }}
           fi
           TAGS="${DOCKER_IMAGE}:${VERSION}-jvm"
-          if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-            TAGS="$TAGS,${DOCKER_IMAGE}:latest-jvm"
-          fi
-          TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}-jvm"
 
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
