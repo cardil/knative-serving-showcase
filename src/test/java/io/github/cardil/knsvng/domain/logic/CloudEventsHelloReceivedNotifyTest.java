@@ -21,7 +21,9 @@ class CloudEventsHelloReceivedNotifyTest {
     var objectMapper = new ObjectMapper();
     var sent = new AtomicReference<CloudEvent>();
     EventSender eventSender = sent::set;
-    var notify = new CloudEventsHelloReceivedNotify(eventSender, objectMapper);
+    var notify = new CloudEventsHelloReceivedNotify(
+      eventSender, objectMapper, () -> false
+    );
     var now = OffsetDateTime.now();
 
     // when

@@ -3,13 +3,13 @@ package io.github.cardil.knsvng.domain.logic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudevents.core.builder.CloudEventBuilder;
+import io.github.cardil.knsvng.config.FailOnSendErrorConfiguration;
 import io.github.cardil.knsvng.domain.entity.Hello;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.wavesoftware.eid.utils.EidExecutions;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
@@ -27,11 +27,16 @@ class CloudEventsHelloReceivedNotify implements HelloReceivedNotify {
 
   private final EventSender eventSender;
   private final ObjectMapper objectMapper;
+  private final FailOnSendErrorConfiguration configuration;
 
   @Inject
-  CloudEventsHelloReceivedNotify(EventSender eventSender, ObjectMapper objectMapper) {
+  CloudEventsHelloReceivedNotify(
+    EventSender eventSender, ObjectMapper objectMapper,
+    FailOnSendErrorConfiguration configuration
+  ) {
     this.eventSender = eventSender;
     this.objectMapper = objectMapper;
+    this.configuration = configuration;
   }
 
   @Override
@@ -50,6 +55,9 @@ class CloudEventsHelloReceivedNotify implements HelloReceivedNotify {
       eventSender.send(event);
     } catch (RuntimeException ex) {
       LOGGER.error("Can't send hello event: {}", event);
+      if (configuration.failOnSendError()) {
+        throw ex;
+      }
       LOGGER.error("Exception", ex);
     }
   }

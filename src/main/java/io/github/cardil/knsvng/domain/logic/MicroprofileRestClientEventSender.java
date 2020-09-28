@@ -39,9 +39,7 @@ class MicroprofileRestClientEventSender implements EventSender {
         new CloudEventsProvider(),
         MessageBodyReader.class, MessageBodyWriter.class, ClientRequestFilter.class
       ).target(sink);
-    var res = target
-      .path("/")
-      .request()
+    var res = target.request()
       .buildPost(Entity.entity(ce, CloudEventsProvider.CLOUDEVENT_TYPE))
       .invoke();
     if (isSuccessful(res)) {

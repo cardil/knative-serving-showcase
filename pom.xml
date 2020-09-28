@@ -150,6 +150,12 @@
       <artifactId>cloudevents-api</artifactId>
       <version>2.0.0-milestone2</version>
     </dependency>
+    <dependency>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock</artifactId>
+      <version>2.27.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <resources>

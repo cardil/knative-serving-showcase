@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @ApplicationScoped
 class AppConfiguration implements
-  EventsConfiguration, GreetConfiguration, DelayConfiguration {
+  EventsConfiguration, GreetConfiguration, DelayConfiguration, FailOnSendErrorConfiguration {
 
   private static final String UNSET_BROKER_ADDRESS = "http://localhost:31111";
   private static final String SINK_ADDRESS = "k.sink";
@@ -19,6 +19,7 @@ class AppConfiguration implements
   private final Provider<String> sinkAddress;
   private final Provider<String> greet;
   private final Provider<Long> delay;
+  private final Provider<Boolean> failOnSendError;
 
   @Inject
   AppConfiguration(
@@ -27,11 +28,14 @@ class AppConfiguration implements
     @ConfigProperty(name = "greet", defaultValue = "Hello")
       Provider<String> greet,
     @ConfigProperty(name = "delay", defaultValue = "0")
-      Provider<Long> delay
+      Provider<Long> delay,
+    @ConfigProperty(name = "fail.on.send.error", defaultValue = "false")
+      Provider<Boolean> failOnSendError
   ) {
     this.sinkAddress = sinkAddress;
     this.greet = greet;
     this.delay = delay;
+    this.failOnSendError = failOnSendError;
   }
 
   @Override
@@ -51,5 +55,10 @@ class AppConfiguration implements
       return Optional.of(delayAsLong);
     }
     return Optional.empty();
+  }
+
+  @Override
+  public boolean failOnSendError() {
+    return failOnSendError.get();
   }
 }
