@@ -29,7 +29,7 @@ class CloudEventsHelloReceivedNotify implements HelloReceivedNotify {
   private final ObjectMapper objectMapper;
 
   @Inject
-  CloudEventsHelloReceivedNotify(@Default EventSender eventSender, ObjectMapper objectMapper) {
+  CloudEventsHelloReceivedNotify(EventSender eventSender, ObjectMapper objectMapper) {
     this.eventSender = eventSender;
     this.objectMapper = objectMapper;
   }
