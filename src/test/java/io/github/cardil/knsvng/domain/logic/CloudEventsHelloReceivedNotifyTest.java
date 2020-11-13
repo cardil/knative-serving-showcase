@@ -3,6 +3,8 @@ package io.github.cardil.knsvng.domain.logic;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudevents.CloudEvent;
 import io.github.cardil.knsvng.domain.entity.Hello;
+import io.opentracing.Tracer;
+import io.opentracing.noop.NoopTracerFactory;
 import org.assertj.core.data.TemporalUnitWithinOffset;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +23,8 @@ class CloudEventsHelloReceivedNotifyTest {
     var objectMapper = new ObjectMapper();
     var sent = new AtomicReference<CloudEvent>();
     EventSender eventSender = sent::set;
-    var notify = new CloudEventsHelloReceivedNotify(eventSender, objectMapper);
+    Tracer tracer = NoopTracerFactory.create();
+    var notify = new CloudEventsHelloReceivedNotify(eventSender, objectMapper, tracer);
     var now = OffsetDateTime.now();
 
     // when

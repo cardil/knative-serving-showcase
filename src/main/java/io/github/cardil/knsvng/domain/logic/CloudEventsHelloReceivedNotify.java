@@ -4,6 +4,8 @@ package io.github.cardil.knsvng.domain.logic;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudevents.core.builder.CloudEventBuilder;
 import io.github.cardil.knsvng.domain.entity.Hello;
+import io.opentracing.Scope;
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.wavesoftware.eid.utils.EidExecutions;
@@ -26,11 +28,17 @@ class CloudEventsHelloReceivedNotify implements HelloReceivedNotify {
 
   private final EventSender eventSender;
   private final ObjectMapper objectMapper;
+  private final Tracer tracer;
 
   @Inject
-  CloudEventsHelloReceivedNotify(EventSender eventSender, ObjectMapper objectMapper) {
+  CloudEventsHelloReceivedNotify(
+    EventSender eventSender,
+    ObjectMapper objectMapper,
+    Tracer tracer
+  ) {
     this.eventSender = eventSender;
     this.objectMapper = objectMapper;
+    this.tracer = tracer;
   }
 
   @Override
@@ -45,7 +53,8 @@ class CloudEventsHelloReceivedNotify implements HelloReceivedNotify {
       .withSource(SOURCE)
       .withData(MediaType.APPLICATION_JSON, data)
       .build();
-    try {
+    String op = "CE:notifyFor(Hello)";
+    try (Scope ignored = tracer.buildSpan(op).startActive(true)) {
       eventSender.send(event);
     } catch (RuntimeException ex) {
       LOGGER.error("Can't send hello event: {}", event);
