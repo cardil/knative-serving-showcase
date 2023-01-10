@@ -4,7 +4,7 @@ package io.github.cardil.knsvng.domain.logic;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudevents.core.builder.CloudEventBuilder;
 import io.github.cardil.knsvng.domain.entity.Hello;
-import io.opentracing.Scope;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +54,14 @@ class CloudEventsHelloReceivedNotify implements HelloReceivedNotify {
       .withData(MediaType.APPLICATION_JSON, data)
       .build();
     String op = "CE:notifyFor(Hello)";
-    try (Scope ignored = tracer.buildSpan(op).startActive(true)) {
+    Span span = tracer.buildSpan(op).start();
+    try {
       eventSender.send(event);
     } catch (RuntimeException ex) {
       LOGGER.error("Can't send hello event: {}", event);
       LOGGER.error("Exception", ex);
+    } finally {
+      span.finish();
     }
   }
 
