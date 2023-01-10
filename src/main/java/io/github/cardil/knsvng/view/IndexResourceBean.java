@@ -1,8 +1,9 @@
 package io.github.cardil.knsvng.view;
 
+import io.github.cardil.knsvng.config.ProjectInfo;
 import io.github.cardil.knsvng.domain.entity.Project;
+import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
-import io.quarkus.qute.api.ResourcePath;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -14,25 +15,25 @@ import javax.ws.rs.core.Response;
 @Path("")
 public class IndexResourceBean implements IndexResource {
   private final Template index;
-  private final Project project;
+  private final ProjectInfo projectInfo;
 
   @Inject
-  IndexResourceBean(@ResourcePath("index.html") Template index, Project project) {
+  IndexResourceBean(@Location("index.html") Template index, ProjectInfo projectInfo) {
     this.index = index;
-    this.project = project;
+    this.projectInfo = projectInfo;
   }
 
   @Override
   public Response index() {
     var body = index
-      .data("project", project)
+      .data("project", projectInfo)
       .render();
     return Response.ok(body, MediaType.TEXT_HTML_TYPE).build();
   }
 
   @Override
   public Project project() {
-    return project;
+    return Project.from(projectInfo);
   }
 
 }

@@ -6,3 +6,4 @@ target/**
 *.iml
 .mvn/wrapper/maven-wrapper.jar
 src/main/container/**
+.git-versioned-pom.xml

@@ -21,15 +21,15 @@ class IndexResourceTest {
 
   @Test
   void index() {
-    var response = resource.index();
-
-    assertThat(response.getMediaType())
-      .isEqualTo(MediaType.TEXT_HTML_TYPE.withCharset("UTF-8"));
-    assertThat(response.readEntity(String.class))
-      .contains(
-      "<code>io.github.cardil</code>",
-      "<code>knative-serving-showcase</code>"
-    );
+    try (var response = resource.index()) {
+      assertThat(response.getMediaType())
+        .isEqualTo(MediaType.TEXT_HTML_TYPE.withCharset("UTF-8"));
+      assertThat(response.readEntity(String.class))
+        .contains(
+          "<code>io.github.cardil</code>",
+          "<code>knative-serving-showcase</code>"
+        );
+    }
   }
 
   @Test

@@ -1,9 +1,9 @@
 package io.github.cardil.knsvng.view;
 
-import io.quarkus.test.junit.NativeImageTest;
+import io.quarkus.test.junit.QuarkusIntegrationTest;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
-@NativeImageTest
+@QuarkusIntegrationTest
 public class NativeIndexResourceRestIT extends IndexResourceTest {
   public NativeIndexResourceRestIT() {
     // Execute the same tests but in native mode.
