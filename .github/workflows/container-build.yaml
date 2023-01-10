@@ -12,50 +12,53 @@ on:
       - 'v*.*.*'
   pull_request:
 
+env:
+  REGISTRY: quay.io
+  IMAGE_NAME: cardil/knative-serving-showcase
+
 jobs:
-  native:
-    name: Native image
-    runs-on: ubuntu-latest
+  build-image:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        kind:
+          - jvm
+          # FIXME: native is not working https://github.com/cardil/knative-serving-showcase/issues/1
+          # - native-standalone
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
       - name: Prepare
         id: prep
-        run: |
-          DOCKER_IMAGE=quay.io/cardil/knative-serving-showcase
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${DOCKER_IMAGE}:${VERSION}"
+        run: .github/workflows/prepare.sh ${{ matrix.kind }}
 
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Login to Quay.io
-        uses: docker/login-action@v1
+        uses: docker/setup-qemu-action@v2
+
+      - name: Pre-build artifacts
+        uses: redhat-actions/buildah-build@v2
+        if: ${{ steps.prep.outputs.pre_build == 'true' }}
         with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_TOKEN }}
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
+          image: builder
+          tags: ${{ github.sha }}
+          containerfiles: ./src/main/container/${{ matrix.kind }}/build.Containerfile
+          platforms: linux/amd64
+          extra-args: --ulimit nofile=4096:4096
+
+      - name: Extract build artifacts from OCI image
+        if: ${{ steps.prep.outputs.pre_build == 'true' }}
+        run: .github/workflows/extract.sh localhost/builder:${{ github.sha }}
+
+      - name: Build the multi-arch image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
         with:
-          context: .
-          file: ./src/main/container/native-standalone/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          containerfiles: ./src/main/container/${{ matrix.kind }}/Containerfile
           tags: ${{ steps.prep.outputs.tags }}
+          platforms: ${{ steps.prep.outputs.platforms }}
+          extra-args: --ulimit nofile=4096:4096
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}
@@ -63,62 +66,27 @@ jobs:
             org.opencontainers.image.source=${{ github.event.repository.clone_url }}
             org.opencontainers.image.version=${{ steps.prep.outputs.version }}
             org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.kind=${{ matrix.kind }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
 
-  jvm:
-    name: Jvm image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Prepare
-        id: prep
-        run: |
-          DOCKER_IMAGE=quay.io/cardil/knative-serving-showcase
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${DOCKER_IMAGE}:${VERSION}-jvm"
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Login to Quay.io
-        uses: docker/login-action@v1
+      - name: Login to registry
+        uses: redhat-actions/podman-login@v1
+        if: ${{ github.event_name != 'pull_request' }}
         with:
-          registry: quay.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
+
+      - name: Push to registry
+        if: ${{ github.event_name != 'pull_request' }}
+        id: push-to-registry
+        uses: redhat-actions/push-to-registry@v2
         with:
-          context: .
-          file: ./src/main/container/jvm-standalone/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.prep.outputs.tags }}
-          labels: |
-            org.opencontainers.image.title=${{ github.event.repository.name }}
-            org.opencontainers.image.description=${{ github.event.repository.description }}
-            org.opencontainers.image.url=${{ github.event.repository.html_url }}
-            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
-            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
-            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+          registry: ${{ env.REGISTRY }}
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ steps.build-image.outputs.tags }}
+
+      - name: Print image url
+        if: ${{ github.event_name != 'pull_request' }}
+        run: echo "Image pushed to ${{ steps.push-to-registry.outputs.registry-paths }}"

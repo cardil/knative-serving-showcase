@@ -2,10 +2,10 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: plain-showcase
+  name: showcase
 spec:
   to:
     kind: Service
-    name: plain-showcase
+    name: showcase
   port:
     targetPort: http

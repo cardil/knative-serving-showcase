@@ -1,7 +1,6 @@
 target/**
 !target/*-runner
-!target/*-runner.jar
-!target/lib/*.jar
+!target/quarkus-app/**
 .idea/**
 *.iml
 .mvn/wrapper/maven-wrapper.jar

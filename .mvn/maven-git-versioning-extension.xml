@@ -5,7 +5,7 @@
   <refs>
     <ref type="branch">
       <pattern>.+</pattern>
-      <version>${ref.slug}-${commit.short}${dirty}</version>
+      <version>${ref.slug}-${commit.short}</version>
       <properties>
         <project.build.outputTimestamp>${commit.timestamp}</project.build.outputTimestamp>
       </properties>

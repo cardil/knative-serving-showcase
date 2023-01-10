@@ -2,12 +2,12 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: serving-showcase
+  name: showcase
 spec:
   template:
     spec:
       containers:
-        - image: quay.io/cardil/knative-serving-showcase:2-send-event
+        - image: quay.io/cardil/knative-serving-showcase
 #          env:
 #            - name: DELAY
 #              value: 1350

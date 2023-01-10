@@ -1,0 +1,39 @@
+####
+# This Containerfile is used in order to build a container that runs the Quarkus application in native (no JVM) mode
+#
+# Build the image with:
+#
+# podman build -f src/main/container/native-standalone/Containerfile \
+#   --ulimit nofile=4096:4096 \
+#   -t cardil/knative-serving-showcase .
+#
+# Then run the container using:
+#
+# podman run -i --rm -p 21111:21111 cardil/knative-serving-showcase
+#
+###
+
+ARG GRAALVM_VERSION=22.3
+ARG UBI_VERSION=8.7
+FROM registry.access.redhat.com/quarkus/mandrel-22-rhel8:${GRAALVM_VERSION} as builder
+
+ADD --chown=quarkus . /project/work
+WORKDIR /project/work
+ENV MVNW_VERBOSE=true
+RUN ./mvnw -V -B --no-transfer-progress -Pnative -Dmaven.artifact.threads=50 clean dependency:go-offline
+RUN ./mvnw -V -B --no-transfer-progress -Pnative verify
+
+FROM registry.access.redhat.com/ubi8/ubi-minimal:${UBI_VERSION}
+WORKDIR /work
+COPY --from=builder /project/work/target/*-runner /work/application
+
+# set up permissions for user `1001`
+RUN chmod 775 /work /work/application \
+  && chown -R 1001 /work \
+  && chmod -R "g+rwX" /work \
+  && chown -R 1001:root /work
+
+EXPOSE 21111
+USER 1001
+
+CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]

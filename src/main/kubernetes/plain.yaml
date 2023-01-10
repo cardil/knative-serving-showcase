@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: plain-showcase
+  name: showcase
   labels:
-    app: plain-showcase
+    app: showcase
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: plain-showcase
+      app: showcase
   template:
     metadata:
       labels:
-        app: plain-showcase
+        app: showcase
     spec:
       containers:
-        - name: plain-showcase
+        - name: showcase
           image: quay.io/cardil/knative-serving-showcase
           readinessProbe:
             httpGet:
@@ -30,10 +30,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: plain-showcase
+  name: showcase
 spec:
   selector:
-    app: plain-showcase
+    app: showcase
   type: LoadBalancer
   ports:
     - name: http
