@@ -72,14 +72,14 @@ jobs:
 
       - name: Login to registry
         uses: redhat-actions/podman-login@v1
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ steps.prep.outputs.push == 'true' }}
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
 
       - name: Push to registry
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ steps.prep.outputs.push == 'true' }}
         id: push-to-registry
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -88,5 +88,5 @@ jobs:
           tags: ${{ steps.build-image.outputs.tags }}
 
       - name: Print image url
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ steps.prep.outputs.push == 'true' }}
         run: echo "Image pushed to ${{ steps.push-to-registry.outputs.registry-paths }}"

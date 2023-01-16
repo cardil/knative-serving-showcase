@@ -25,15 +25,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @QuarkusTest
 @QuarkusTestResource(EventSinkWiremock.class)
-class HelloResourceTest {
+class HelloResourceTest implements HasWiremockServer {
 
   private final HelloResourceTestClient helloResource;
 
-  WireMockServer wireMockServer;
+  private WireMockServer wireMockServer;
 
   @Inject
   HelloResourceTest(@RestClient HelloResourceTestClient helloResource) {
     this.helloResource = helloResource;
+  }
+
+  @Override
+  public final void setWireMockServer(WireMockServer wireMockServer) {
+    this.wireMockServer = wireMockServer;
   }
 
   @Test
@@ -72,5 +77,4 @@ class HelloResourceTest {
 
     assertThatThrownBy(throwingCallable).hasMessageContaining("status code 400");
   }
-
 }

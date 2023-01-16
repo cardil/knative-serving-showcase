@@ -28,8 +28,8 @@ public final class EventSinkWiremock implements QuarkusTestResourceLifecycleMana
 
   @Override
   public void inject(Object testInstance) {
-    if (testInstance instanceof HelloResourceTest) {
-      ((HelloResourceTest) testInstance).wireMockServer = wireMockServer;
+    if (testInstance instanceof HasWiremockServer) {
+      ((HasWiremockServer) testInstance).setWireMockServer(wireMockServer);
     }
   }
 }
