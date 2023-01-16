@@ -4,7 +4,7 @@ import io.quarkus.test.junit.QuarkusIntegrationTest;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 @QuarkusIntegrationTest
-public class NativeIndexResourceRestIT extends IndexResourceTest {
+class NativeIndexResourceRestIT extends IndexResourceTest {
   public NativeIndexResourceRestIT() {
     // Execute the same tests but in native mode.
     super(getTestClient());

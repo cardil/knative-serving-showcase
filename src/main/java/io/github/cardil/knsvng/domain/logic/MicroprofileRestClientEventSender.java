@@ -11,13 +11,9 @@ import pl.wavesoftware.eid.exceptions.EidIllegalStateException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
-
 import java.net.URI;
 
 import static pl.wavesoftware.eid.DefaultEid.eid;
@@ -47,10 +43,7 @@ class MicroprofileRestClientEventSender implements EventSender {
 
   private WebTarget webTarget(URI sink) {
     return ClientBuilder.newClient()
-      .register(
-        new CloudEventsProvider(),
-        MessageBodyReader.class, MessageBodyWriter.class, ClientRequestFilter.class
-      ).target(sink);
+      .target(sink);
   }
 
   private void handleResponse(CloudEvent ce, URI sink, Response res) {

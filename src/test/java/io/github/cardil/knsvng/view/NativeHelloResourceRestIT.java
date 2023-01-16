@@ -4,7 +4,7 @@ import io.quarkus.test.junit.QuarkusIntegrationTest;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 @QuarkusIntegrationTest
-public class NativeHelloResourceRestIT extends HelloResourceTest {
+class NativeHelloResourceRestIT extends HelloResourceTest {
   public NativeHelloResourceRestIT() {
     // Execute the same tests but in native mode.
     super(getTestClient());
