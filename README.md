@@ -1,5 +1,7 @@
 # knative-serving-showcase project
 
+## Code donated to https://github.com/openshift-knative/showcase
+
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
